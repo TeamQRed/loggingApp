@@ -1,0 +1,3 @@
+rootProject.name = 'qredLogger'
+
+include ':app'
