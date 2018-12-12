@@ -16,31 +16,15 @@ const instructions = Platform.select({
     'Shake or press menu button for dev menu',
 });
 
-class MyListItem extends React.Component {
-  _onPress = () => {
-    this.props.onPressItem(this.props.id);
-  };
-
-  render() {
-    const textColor = this.props.selected ? "red" : "black";
-    return (
-      <TouchableOpacity onPress={this._onPress}>
-        <View>
-          <Text style={{ color: textColor }}>
-            {this.props.title}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
-  }
-}
-
 export default class App extends Component {
   
   constructor() {
     super()
     this.state = {
-      isLoading: true
+      isLoading: true,
+      carId: '0000',
+      carType: 'Car',
+      currTime: '0'
     }
   }
 
@@ -56,11 +40,14 @@ export default class App extends Component {
         console.log(value);
         this.setState({
           log: value,
-          isLoading: false
+          isLoading: false,
         })
       }
       else {
-        return "empty"
+        this.setState({
+          log: [],
+          isLoading: false,
+        })
       }
      } catch (error) {
        // Error retrieving data
@@ -72,12 +59,32 @@ export default class App extends Component {
     try {
       await AsyncStorage.setItem('LOGS', JSON.stringify(logArr));
       await Alert.alert("Data saved successfully!")
+      console.log(logArr)
+    } catch (error) {
+      // Error saving data
+    }
+  }
+
+  _resetData = async () => {
+    try {
+      await AsyncStorage.removeItem('LOGS');
+      await Alert.alert("Reset successfull!")
     } catch (error) {
       // Error saving data
     }
   }
 
   saveTimeToState = () => {
+    const currTime = new Date().toLocaleTimeString()
+    this.setState({
+      currTime: currTime
+    })
+  }
+
+  insertInLog = () => {
+    this.setState((prevState) => ({
+      log: [...prevState.log, {'id': this.state.carId, 'type': this.state.carType, 'time':this.state.currTime}]
+    }))
 
   }
   
@@ -86,22 +93,25 @@ export default class App extends Component {
     if (this.state.isLoading) {
       return <View><Text>Loading...</Text></View>;
     }
+    if (this.state.log == []) {
+      return <View><Text>Nothing to show :D</Text></View>
+    }
     return (
       <View style={styles.container}>
-        <View style={{flex: 0.4, padding: 20}}>
+        <View style={{flex: 0.5, padding: 20}}>
           <Text>QRED LOGGING APP</Text>
           <View style={styles.formBar}>
             <TextInput
               style={{height: 40, borderColor: 'gray', borderWidth: 1, width: 80}}
               placeholder="Enter Car Id"
-              onChangeText={(text) => this.setState({text})}
-              value={this.state.text}
+              onChangeText={(carId) => this.setState({carId})}
+              value={this.state.carId}
               keyboardType={"decimal-pad"}
             />
             <Picker
-              selectedValue={this.state.vehicleType}
+              selectedValue={this.state.carType}
               style={{ height: 50, width: 100 }}
-              onValueChange={(itemValue, itemIndex) => this.setState({vehicleType: itemValue})}>
+              onValueChange={(itemValue, itemIndex) => this.setState({carType: itemValue})}>
               <Picker.Item label="Car" value="Car" />
               <Picker.Item label="Auto" value="Auto" />
               <Picker.Item label="Etc" value="Etc" />
@@ -110,7 +120,11 @@ export default class App extends Component {
               title="Set Time"
               onPress={() => this.saveTimeToState()} 
             />
-      
+          </View>
+          <View style={styles.formBar}>
+            <Text>{this.state.carId}</Text>
+            <Text>{this.state.carType}</Text>
+            <Text>{this.state.currTime}</Text>
           </View>
           <Button 
             title="Insert"
@@ -119,11 +133,23 @@ export default class App extends Component {
           <Button 
             onPress={() => this._storeData()} 
             title="Save Data"/>
+          <Button 
+            onPress={() => this._resetData()} 
+            title="Reset" />
         </View>
         <View style={styles.displayArea}>
           <Text>Today's Log</Text>
           <FlatList
-          style={{flex: 0.9}} 
+          data={this.state.log}
+          showsVerticalScrollIndicator={false}
+          renderItem={({item}) =>
+          <View style={styles.flatview}>
+            <Text style={styles.carId}>{item.id}</Text>
+            <Text style={styles.carType}>{item.type}</Text>
+            <Text style={styles.time}>{item.time}</Text>
+          </View>
+          }
+          keyExtractor={item => item.email}
           />
         </View>
       </View>
@@ -162,4 +188,16 @@ const styles = StyleSheet.create({
     color: '#333333',
     marginBottom: 5,
   },
+  flatview: {
+    justifyContent: 'center',
+    paddingTop: 30,
+    borderRadius: 2,
+  },
+  carId: {
+    fontFamily: 'Verdana',
+    fontSize: 18
+  },
+  carType: {
+    color: 'red'
+  }
 });
