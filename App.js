@@ -22,9 +22,9 @@ export default class App extends Component {
     super()
     this.state = {
       isLoading: true,
-      carId: '0000',
-      carType: 'Car',
-      currTime: '0'
+      carId: '',
+      carType: '',
+      currTime: ''
     }
   }
 
@@ -98,8 +98,8 @@ export default class App extends Component {
     }
     return (
       <View style={styles.container}>
-        <View style={{flex: 0.5, padding: 20}}>
-          <Text>QRED LOGGING APP</Text>
+        <View style={{flex: 0.5, padding: 20, justifyContent: "space-around", justifyContent:"space-between", justifyContent: "space-evenly"}}>
+          <Text style={styles.centering}>QRED LOGGING APP</Text>
           <View style={styles.formBar}>
             <TextInput
               style={{height: 40, borderColor: 'gray', borderWidth: 1, width: 80}}
@@ -138,7 +138,7 @@ export default class App extends Component {
             title="Reset" />
         </View>
         <View style={styles.displayArea}>
-          <Text>Today's Log</Text>
+         <Text></Text>
           <FlatList
           data={this.state.log}
           showsVerticalScrollIndicator={false}
@@ -156,7 +156,6 @@ export default class App extends Component {
     );
   }
 }
-
 const styles = StyleSheet.create({
   container: {
     paddingTop: 20,
@@ -199,5 +198,10 @@ const styles = StyleSheet.create({
   },
   carType: {
     color: 'red'
+  },
+  centering: {
+    textAlign: 'center',
+    backgroundColor: 'blue',
+    color: 'white'
   }
 });
